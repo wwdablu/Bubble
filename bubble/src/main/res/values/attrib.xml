@@ -8,7 +8,7 @@
         <attr name="bubbleSpeed" format="integer" />
         <attr name="bubbleBump" format="boolean" />
         <attr name="bubbleColor" format="color" />
-        <attr name="bubbleAlpha" format="float" />
+        <attr name="refreshTime" format="integer" />
     </declare-styleable>
     
 </resources>
