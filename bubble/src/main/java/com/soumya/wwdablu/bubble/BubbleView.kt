@@ -1,9 +1,10 @@
 package com.soumya.wwdablu.bubble
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Point
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -15,31 +16,52 @@ import kotlin.collections.ArrayList
 
 class BubbleView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
-    private enum class Direction {
-        TopLeft, TopRight, BottomLeft, BottomRight
-    }
+    private val MAX_BUBBLE_COUNT = 10
 
-    private val mBubblePainter: Paint
-    private val mBubbleAttributes: BubbleAttributes = BubbleAttributes(context, attributeSet)
+    private val mBubblePainter: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    private var mBubbles: ArrayList<Bitmap> = ArrayList()
-    private var mBubblePoints: ArrayList<Point> = ArrayList()
-    private var mBubbleDirection: ArrayList<Direction> = ArrayList()
-    private var mBubbleSpeed: ArrayList<Int> = ArrayList()
+    private var mBubbles: ArrayList<Bubble> = ArrayList()
     private var mViewWidth: Int = 0
     private var mViewHeight: Int = 0
 
+    internal var bubbleCount: Int = 1
+    set(value) {
+        field = when (value) {
+            in 1..MAX_BUBBLE_COUNT -> {
+                value
+            }
+            else -> MAX_BUBBLE_COUNT
+        }
+    }
+
+    internal var refreshTime: Long = 1
+    set(value) {
+        if(value <= 0) {
+            field = 33
+        } else {
+            field = value
+        }
+    }
+
     init {
-        mBubbles.add(createBubble(mBubbleAttributes.bubbleWidth, mBubbleAttributes.bubbleHeight))
-        mBubblePoints.add(Point(0,0))
-        mBubbleDirection.add(Direction.BottomRight)
-        mBubbleSpeed.add(5)
-        mBubblePainter = Paint(Paint.ANTI_ALIAS_FLAG)
+        val typedArray = context.obtainStyledAttributes(attributeSet, R.styleable.BubbleView)
+        bubbleCount = typedArray.getInt(R.styleable.BubbleView_bubbleCount, 1)
+        refreshTime = typedArray.getInt(R.styleable.BubbleView_refreshTime, 33).toLong()
+        typedArray.recycle()
+
+        for(i in 0 until bubbleCount) {
+            mBubbles.add(Bubble(context, attributeSet))
+        }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         mViewWidth = w
         mViewHeight = h
+
+        for(i in 0 until bubbleCount) {
+            mBubbles[i].currentPoint.x = getRandomNumberBetween(0, w)
+            mBubbles[i].currentPoint.y = getRandomNumberBetween(0, h)
+        }
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -47,7 +69,10 @@ class BubbleView(context: Context, attributeSet: AttributeSet) : View(context, a
         //Incase of invalid canvas return
         canvas?: return
 
-        canvas.drawBitmap(mBubbles[0], mBubblePoints[0].x.toFloat(), mBubblePoints[0].y.toFloat(), mBubblePainter)
+        for(i in 0 until bubbleCount) {
+            canvas.drawBitmap(mBubbles[i].bubble, mBubbles[i].currentPoint.x.toFloat(),
+                    mBubbles[i].currentPoint.y.toFloat(), mBubblePainter)
+        }
     }
 
     override fun onDetachedFromWindow() {
@@ -57,7 +82,7 @@ class BubbleView(context: Context, attributeSet: AttributeSet) : View(context, a
 
     private fun startBubbleEngine() {
 
-        Observable.interval(33L, TimeUnit.MILLISECONDS)
+        Observable.interval(refreshTime, TimeUnit.MILLISECONDS)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.computation())
             .subscribeWith(object : DisposableObserver<Long>() {
@@ -66,25 +91,29 @@ class BubbleView(context: Context, attributeSet: AttributeSet) : View(context, a
                 }
 
                 override fun onNext(t: Long) {
-                    val direction = whichDirectionToMoveFor(0)
-                    mBubbleDirection[0] = direction
 
-                    when(direction) {
-                        Direction.TopLeft -> {
-                            mBubblePoints[0].x -= mBubbleSpeed[0]
-                            mBubblePoints[0].y -= mBubbleSpeed[0]
-                        }
-                        Direction.TopRight -> {
-                            mBubblePoints[0].x += mBubbleSpeed[0]
-                            mBubblePoints[0].y -= mBubbleSpeed[0]
-                        }
-                        Direction.BottomRight -> {
-                            mBubblePoints[0].x += mBubbleSpeed[0]
-                            mBubblePoints[0].y += mBubbleSpeed[0]
-                        }
-                        Direction.BottomLeft -> {
-                            mBubblePoints[0].x -= mBubbleSpeed[0]
-                            mBubblePoints[0].y += mBubbleSpeed[0]
+                    for (i in 0 until bubbleCount) {
+
+                        val direction = whichDirectionToMoveFor(i)
+                        mBubbles[i].direction = direction
+
+                        when (direction) {
+                            Direction.TopLeft -> {
+                                mBubbles[i].currentPoint.x -= mBubbles[i].bubbleSpeed
+                                mBubbles[i].currentPoint.y -= mBubbles[i].bubbleSpeed
+                            }
+                            Direction.TopRight -> {
+                                mBubbles[i].currentPoint.x += mBubbles[i].bubbleSpeed
+                                mBubbles[i].currentPoint.y -= mBubbles[i].bubbleSpeed
+                            }
+                            Direction.BottomRight -> {
+                                mBubbles[i].currentPoint.x += mBubbles[i].bubbleSpeed
+                                mBubbles[i].currentPoint.y += mBubbles[i].bubbleSpeed
+                            }
+                            Direction.BottomLeft -> {
+                                mBubbles[i].currentPoint.x -= mBubbles[i].bubbleSpeed
+                                mBubbles[i].currentPoint.y += mBubbles[i].bubbleSpeed
+                            }
                         }
                     }
 
@@ -99,24 +128,22 @@ class BubbleView(context: Context, attributeSet: AttributeSet) : View(context, a
 
     private fun whichDirectionToMoveFor(bubbeIndex: Int): Direction {
 
-        val bitmapWidth = mBubbles[bubbeIndex].width
-        val bitmapHeight = mBubbles[bubbeIndex].height
+        val bitmapWidth = mBubbles[bubbeIndex].bubbleWidth
+        val bitmapHeight = mBubbles[bubbeIndex].bubbleHeight
 
-        val lastPoint: Point = mBubblePoints[bubbeIndex]
-        var moveDirection: Direction = mBubbleDirection[bubbeIndex]
+        val lastPoint: Point = mBubbles[bubbeIndex].currentPoint
+        var moveDirection: Direction = mBubbles[bubbeIndex].direction
 
         //First check if the bitmap has reached the boundary based on the current direction
         if(!hasReachedBoundaryFor(moveDirection, lastPoint, bitmapWidth, bitmapHeight)) {
             return moveDirection
         }
 
-        moveDirection = Direction.values()[randomizeDirection(0, 4)]
-
-        Log.d("TAG", "Direction: " + moveDirection.toString())
+        moveDirection = Direction.values()[getRandomNumberBetween(0, 4)]
         return moveDirection
     }
 
-    fun randomizeDirection(from: Int, to: Int) : Int {
+    fun getRandomNumberBetween(from: Int, to: Int) : Int {
         return Random().nextInt(to - from) + from
     }
 
@@ -149,27 +176,9 @@ class BubbleView(context: Context, attributeSet: AttributeSet) : View(context, a
         return onBoundary
     }
 
-    private fun createBubble(width:Int, height:Int): Bitmap {
-
-        val bubble = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        bubble.setHasAlpha(true)
-
-        var bubbleRadius = height/2F
-        if(width < height) {
-            bubbleRadius = width/2F
-        }
-
-        val canvas = Canvas(bubble)
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        paint.color = Color.parseColor("#88FFFFFF")
-        canvas.drawCircle((width/2).toFloat(), (height/2).toFloat(), bubbleRadius, paint)
-
-        return bubble
-    }
-
     private fun destroy() {
         for (bubble in mBubbles) {
-            bubble.recycle()
+            bubble.bubble.recycle()
         }
 
         mBubbles.clear()
