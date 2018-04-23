@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <declare-styleable name="BubbleView">
+        <attr name="bubbleWidth" format="dimension" />
+        <attr name="bubbleHeight" format="dimension" />
+        <attr name="bubbleCount" format="integer" />
+        <attr name="bubbleSpeed" format="integer" />
+        <attr name="bubbleBump" format="boolean" />
+        <attr name="bubbleColor" format="color" />
+        <attr name="bubbleAlpha" format="float" />
+    </declare-styleable>
+    
+</resources>

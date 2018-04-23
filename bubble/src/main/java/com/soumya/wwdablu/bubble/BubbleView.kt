@@ -13,13 +13,14 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
-class BubbleView : View {
+class BubbleView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
     private enum class Direction {
         TopLeft, TopRight, BottomLeft, BottomRight
     }
 
     private val mBubblePainter: Paint
+    private val mBubbleAttributes: BubbleAttributes = BubbleAttributes(context, attributeSet)
 
     private var mBubbles: ArrayList<Bitmap> = ArrayList()
     private var mBubblePoints: ArrayList<Point> = ArrayList()
@@ -29,15 +30,11 @@ class BubbleView : View {
     private var mViewHeight: Int = 0
 
     init {
-        mBubbles.add(createBubble(300, 300))
+        mBubbles.add(createBubble(mBubbleAttributes.bubbleWidth, mBubbleAttributes.bubbleHeight))
         mBubblePoints.add(Point(0,0))
         mBubbleDirection.add(Direction.BottomRight)
         mBubbleSpeed.add(5)
         mBubblePainter = Paint(Paint.ANTI_ALIAS_FLAG)
-    }
-
-    constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet) {
-        startBubbleEngine()
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -51,6 +48,11 @@ class BubbleView : View {
         canvas?: return
 
         canvas.drawBitmap(mBubbles[0], mBubblePoints[0].x.toFloat(), mBubblePoints[0].y.toFloat(), mBubblePainter)
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        destroy()
     }
 
     private fun startBubbleEngine() {
@@ -108,23 +110,13 @@ class BubbleView : View {
             return moveDirection
         }
 
-//        moveDirection = if(lastPoint.x <= 0 || lastPoint.y <= 0) {
-//            Direction.BottomRight
-//        } else if (lastPoint.x + bitmapWidth >= mViewWidth) {
-//            Direction.BottomLeft
-//        } else if (lastPoint.y + bitmapHeight >= mViewHeight) {
-//            Direction.TopRight
-//        } else {
-//            Direction.TopLeft
-//        }
-
-        moveDirection = Direction.values()[rand(0, 4)]
+        moveDirection = Direction.values()[randomizeDirection(0, 4)]
 
         Log.d("TAG", "Direction: " + moveDirection.toString())
         return moveDirection
     }
 
-    fun rand(from: Int, to: Int) : Int {
+    fun randomizeDirection(from: Int, to: Int) : Int {
         return Random().nextInt(to - from) + from
     }
 
@@ -160,11 +152,17 @@ class BubbleView : View {
     private fun createBubble(width:Int, height:Int): Bitmap {
 
         val bubble = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        bubble.setHasAlpha(true)
+
+        var bubbleRadius = height/2F
+        if(width < height) {
+            bubbleRadius = width/2F
+        }
 
         val canvas = Canvas(bubble)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        paint.color = Color.RED
-        canvas.drawCircle(150F, 150F, 150F, paint)
+        paint.color = Color.parseColor("#88FFFFFF")
+        canvas.drawCircle((width/2).toFloat(), (height/2).toFloat(), bubbleRadius, paint)
 
         return bubble
     }
@@ -175,5 +173,9 @@ class BubbleView : View {
         }
 
         mBubbles.clear()
+    }
+
+    init {
+        startBubbleEngine()
     }
 }

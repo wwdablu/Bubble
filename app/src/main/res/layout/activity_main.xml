@@ -6,8 +6,36 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <!--
+    Photo by Spencer Selover from Pexels
+    https://www.pexels.com/photo/beauty-blur-casual-close-up-428377/
+    This image has been used as the background for BubbleView
+    -->
+
     <com.soumya.wwdablu.bubble.BubbleView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:background="@drawable/bubble_bg"
+        app:bubbleBump="false"
+        app:bubbleAlpha="1"
+        app:bubbleColor="#FF0000"
+        app:bubbleCount="1"
+        app:bubbleSpeed="2"
+        app:bubbleWidth="300dp"
+        app:bubbleHeight="300dp"
+        />
+
+    <!--
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="50dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        />
+        -->
 
 </FrameLayout>
