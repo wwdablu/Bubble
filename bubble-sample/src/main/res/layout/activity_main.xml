@@ -15,6 +15,17 @@
     <com.soumya.wwdablu.bubble.BubbleView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:id="@+id/bubble_view"
+        android:background="@drawable/bubble_bg"
+        app:refreshTime="16"
+        />
+
+    <!-- Either draw it from XML or draw it from the code -->
+    <!--
+    <com.soumya.wwdablu.bubble.BubbleView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/bubble_view"
         android:background="@drawable/bubble_bg"
         app:bubbleBump="false"
         app:bubbleColor="#88FFFFFF"
@@ -24,7 +35,9 @@
         app:bubbleHeight="50dp"
         app:refreshTime="16"
         />
+        -->
 
+    <!--
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="300dp"
@@ -35,5 +48,6 @@
         app:cardCornerRadius="8dp"
         app:cardElevation="4dp"
         />
+        -->
 
 </FrameLayout>

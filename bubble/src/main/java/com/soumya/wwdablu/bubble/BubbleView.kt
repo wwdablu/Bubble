@@ -80,6 +80,15 @@ class BubbleView(context: Context, attributeSet: AttributeSet) : View(context, a
         destroy()
     }
 
+    fun setBubbles(bubbleArray: ArrayList<Bubble>) {
+
+        destroy()
+        bubbleCount = if (MAX_BUBBLE_COUNT < bubbleArray.size) MAX_BUBBLE_COUNT else bubbleArray.size
+        for(i in 0 until bubbleCount) {
+            mBubbles.add(bubbleArray[i])
+        }
+    }
+
     private fun startBubbleEngine() {
 
         Observable.interval(refreshTime, TimeUnit.MILLISECONDS)
@@ -91,6 +100,11 @@ class BubbleView(context: Context, attributeSet: AttributeSet) : View(context, a
                 }
 
                 override fun onNext(t: Long) {
+
+                    //If 0, then do not draw
+                    if(mBubbles.size == 0) {
+                        return
+                    }
 
                     for (i in 0 until bubbleCount) {
 
@@ -178,7 +192,7 @@ class BubbleView(context: Context, attributeSet: AttributeSet) : View(context, a
 
     private fun destroy() {
         for (bubble in mBubbles) {
-            bubble.bubble.recycle()
+            bubble.bubble?.recycle()
         }
 
         mBubbles.clear()

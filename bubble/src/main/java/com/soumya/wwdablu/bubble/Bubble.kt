@@ -4,16 +4,16 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 
-class Bubble internal constructor(context: Context, attributeSet: AttributeSet) {
+class Bubble {
 
     private val MAX_BUBBLE_SPEED = 5
 
     internal val currentPoint: Point = Point(0, 0)
     internal var direction: Direction = Direction.BottomRight
 
-    internal lateinit var bubble: Bitmap
+    internal var bubble: Bitmap? = null
 
-    internal var bubbleSpeed: Int = 1
+    var bubbleSpeed: Int = 1
     set(value) {
         field = when (value) {
             in 1..MAX_BUBBLE_SPEED -> {
@@ -23,19 +23,19 @@ class Bubble internal constructor(context: Context, attributeSet: AttributeSet) 
         }
     }
 
-    internal var bubbleWidth: Int = 100
+    var bubbleWidth: Int = 100
     set(value) {
         field = if (value < 10) 10 else value
     }
 
-    internal var bubbleHeight: Int = 100
+    var bubbleHeight: Int = 100
     set(value) {
         field = if (value < 10) 10 else value
     }
 
-    internal var bubbleColor: Int = Color.parseColor("#88FFFFFF")
+    var bubbleColor: Int = Color.parseColor("#88FFFFFF")
 
-    init {
+    internal constructor(context: Context, attributeSet: AttributeSet) {
         val typedArray = context.obtainStyledAttributes(attributeSet, R.styleable.BubbleView)
 
         //Read bubble speed
@@ -56,7 +56,11 @@ class Bubble internal constructor(context: Context, attributeSet: AttributeSet) 
         createBubble()
     }
 
-    private fun createBubble() {
+    constructor() {
+        //
+    }
+
+    fun createBubble() {
 
         bubble = Bitmap.createBitmap(bubbleWidth, bubbleHeight, Bitmap.Config.ARGB_8888)
 
