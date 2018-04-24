@@ -51,6 +51,42 @@ class MainActivity : AppCompatActivity() {
         bubble.createBubble()
         bubbles.add(bubble)
 
+        //Cyan
+        bubble = Bubble()
+        bubble.bubbleSpeed = 2
+        bubble.bubbleColor = Color.parseColor("#8800FFFF")
+        bubble.bubbleHeight = 250
+        bubble.bubbleWidth = 250
+        bubble.createBubble()
+        bubbles.add(bubble)
+
+        //Yellow
+        bubble = Bubble()
+        bubble.bubbleSpeed = 2
+        bubble.bubbleColor = Color.parseColor("#88FFFF00")
+        bubble.bubbleHeight = 200
+        bubble.bubbleWidth = 200
+        bubble.createBubble()
+        bubbles.add(bubble)
+
+        //Magenta
+        bubble = Bubble()
+        bubble.bubbleSpeed = 2
+        bubble.bubbleColor = Color.parseColor("#88CD00CD")
+        bubble.bubbleHeight = 150
+        bubble.bubbleWidth = 150
+        bubble.createBubble()
+        bubbles.add(bubble)
+
+        //Black
+        bubble = Bubble()
+        bubble.bubbleSpeed = 2
+        bubble.bubbleColor = Color.parseColor("#88000000")
+        bubble.bubbleHeight = 100
+        bubble.bubbleWidth = 100
+        bubble.createBubble()
+        bubbles.add(bubble)
+
         bubbleView.setBubbles(bubbles)
     }
 }
