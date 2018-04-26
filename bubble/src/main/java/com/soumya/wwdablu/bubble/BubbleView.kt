@@ -36,11 +36,7 @@ class BubbleView(context: Context, attributeSet: AttributeSet) : View(context, a
 
     internal var refreshTime: Long = 1
     set(value) {
-        if(value <= 0) {
-            field = 33
-        } else {
-            field = value
-        }
+        field = if(value <= 0) 33 else value
     }
 
     init {
@@ -52,6 +48,8 @@ class BubbleView(context: Context, attributeSet: AttributeSet) : View(context, a
         for(i in 0 until bubbleCount) {
             mBubbles.add(Bubble(context, attributeSet))
         }
+
+        startBubbleEngine()
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -71,7 +69,7 @@ class BubbleView(context: Context, attributeSet: AttributeSet) : View(context, a
 
         for(i in 0 until bubbleCount) {
             canvas.drawBitmap(mBubbles[i].bubble, mBubbles[i].currentPoint.x.toFloat(),
-                    mBubbles[i].currentPoint.y.toFloat(), mBubblePainter)
+                mBubbles[i].currentPoint.y.toFloat(), mBubblePainter)
         }
     }
 
@@ -196,9 +194,5 @@ class BubbleView(context: Context, attributeSet: AttributeSet) : View(context, a
         }
 
         mBubbles.clear()
-    }
-
-    init {
-        startBubbleEngine()
     }
 }
